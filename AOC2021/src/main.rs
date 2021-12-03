@@ -1,62 +1,66 @@
-use Movement::{Up, Down, Forward};
 use std::fs::File;
-use std::io::{BufReader, BufRead};
-
-#[derive(Debug)]
-struct Submarine {
-    horizontal: u32,
-    depth: u32,
-}
-
-impl Submarine {
-    fn moves(&mut self, movement:Movement) -> () {
-        match movement {
-            Up(x) => self.depth -= x,
-            Down(x) => self.depth += x,
-            Forward(x) => self.horizontal += x,
-        };
-    }
-}
-
-enum Movement {
-    Up(u32),
-    Down(u32),
-    Forward(u32),
-}
+use std::io::{BufRead, BufReader};
 
 fn main() {
-    println!("this is main starting");
+    println!("main starts here");
     puzzle1();
     puzzle2();
 }
 
-fn transform_instructions() -> Vec<Movement> {
-    let filename = String::from("inputp3p4.txt");
-    let file = File::open(filename).expect("file cannot be read");
-    let reader = BufReader::new(file);        
+fn puzzle1() {
+    println!("puzzle 1 is starting");
+    
+    let filename = String::from("inputp3p1.txt");
+    let firstfile = File::open(&filename).expect("cannot open file error");
+    let mut initialreader = BufReader::new(firstfile);
+    let mut readcharacter = Vec::<u8>::new();    
+    
+    let mut amountnums: usize = 0;
+    // iterate over first line, read until newline
+    match initialreader.read_until(b'\n', &mut readcharacter){
+        Ok(buffer) => amountnums = buffer,
+        _ => println!("oops error"),
+    };
 
-    let mut result: Vec<Movement> = Vec::new();
+    let mut result = vec![vec![0; 2]; amountnums - 1];
 
-    for line in reader.lines(){
-        let splits = line.unwrap().split_whitespace();
-        result.push(match splits[0]{
-            "forward" => Movement::Forward(splits[1].parse::<u32>().expect("parsing error")),
-            "down" => Movement::Down(splits[1].parse::<u32>().expect("parsing error")),
-            "up" => Movement::Up(splits[1].parse::<u32>().expect("parsing error")),                    
-        });
+    let file = File::open(&filename).expect("cant open file error");
+    let mut reader = BufReader::new(file);
+    
+    let mut linebuffer = Vec::<u8>::new();
+   
+    while reader.read_until(b'\n', &mut linebuffer).expect("reader failed") != 0 {
+        let line_as_string = String::from_utf8(linebuffer).expect("line as string failed");
+        let string: &str = &line_as_string[0..line_as_string.len() - 1];
+       
+        for (i, c) in string.chars().enumerate() {
+            if c == '1' {
+                result[i][1] += 1;
+            } else {
+                result[i][0] += 1;
+            }
+        }
+        linebuffer = line_as_string.into_bytes();
+        linebuffer.clear();
+    }
+
+    let mut gamma = String::from("");    
+    let mut epsilon = String::from("");
+
+    for number in 0..result.len() {
+        if result[number][0] > result[number][1] {
+            gamma.push_str("0");     
+            epsilon.push_str("1");   
+        } else {
+            gamma.push_str("1");
+            epsilon.push_str("0");
+        }
     }
     
-    result
+    println!("the final answer: {}", isize::from_str_radix(&gamma, 2).unwrap() * isize::from_str_radix(&epsilon, 2).unwrap());
+    
 }
 
-fn puzzle1() { 
-    let mut sub = Submarine {
-        horizontal: 0,
-        depth: 0,
-    };
+fn puzzle2() {
+    println!("puzzle 2 is starting");
 }
-
-fn puzzle2() {  
-    println!("puzzle 2");
-}
-
