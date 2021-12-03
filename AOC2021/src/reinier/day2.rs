@@ -1,58 +1,75 @@
-use Movement::{Up, Down, Forward, No};
+use Movement::{Up, Down, Forward};
 
 use std::io::{BufReader, BufRead};
 use std::fs::File;
 
 #[derive(Debug)]
 enum Movement {
-    Up(u32),
-    Down(u32),
-    Forward(u32),
-    No,
+    Up(i32),
+    Down(i32),
+    Forward(i32),
 }
 
 #[derive(Debug)]
 struct Submarine {
 
-    horizontal :u32,
-    depth: u32,
-
+    horizontal :i32,
+    depth :i32,
+    aim :i32
 }
 
 impl Submarine {
-    fn moves(&mut self, movement :Movement) -> () {
+    fn moves(&mut self, movement :&Movement) -> () {
         match movement {
             Up(x) => self.depth -= x,
             Down(x) => self.depth += x,
             Forward(x) => self.horizontal += x,
-            _ => println!("THATS UNEXPECTED!"),
         };
 
+    }
+
+    fn moves2(&mut self, movement :&Movement) -> () {
+        match movement {
+            Up(x) => self.aim -= x,
+            Down(x) => self.aim += x,
+            Forward(x) => {self.horizontal += x; self.depth += self.aim*x;},
+        };
     }
 }
 
 fn main() {
     let list = transform_instructions();
     println!("main");
-    puzzle1(list);
-    puzzle2();
+    puzzle1(&list);
+    puzzle2(&list);
 }
 
-fn puzzle1(vec :Vec<Movement>) -> () {
+fn puzzle1(vec :&Vec<Movement>) -> () {
     let mut sub = Submarine {
         horizontal: 0,
         depth: 0,
+        aim: 0,
     };
 
     for mov in vec {
-        sub.moves(mov);
+        sub.moves(&mov);
     };
 
-    println!("puzzle1: {:?}", sub);
+    println!("puzzle1: {:?}", sub.horizontal * sub.depth);
 }
 
-fn puzzle2() {
-    println!("puzzle2");
+fn puzzle2(vec :&Vec<Movement>) -> () {
+    let mut sub = Submarine {
+        horizontal: 0,
+        depth: 0,
+        aim: 0,
+    };
+
+    for mov in vec {
+        sub.moves2(&mov);
+    };
+
+    println!("puzzle2: {:?}", sub.horizontal * sub.depth);
 }
 
 fn transform_instructions() -> Vec<Movement> {
@@ -67,10 +84,10 @@ fn transform_instructions() -> Vec<Movement> {
         match errline {
             Ok(line) => { let splits :Vec<&str> = line.split_whitespace().collect();
                 result.push(match splits[0] {
-                    "forward" => Movement::Forward(splits[1].parse::<u32>().expect("parsing fault")),
-                    "down" => Movement::Down(splits[1].parse::<u32>().expect("parsing fault")),
-                    "up" => Movement::Up(splits[1].parse::<u32>().expect("parsing faukt")),
-                    _ => Movement::No,
+                    "forward" => Movement::Forward(splits[1].parse::<i32>().expect("parsing fault")),
+                    "down" => Movement::Down(splits[1].parse::<i32>().expect("parsing fault")),
+                    "up" => Movement::Up(splits[1].parse::<i32>().expect("parsing faukt")),
+                    _ => panic!("unexpected input"),
                 });},
              _ => continue,
         }
