@@ -3,7 +3,7 @@ use std::io::prelude::*;
 use std::io::BufReader;
 
 fn main() {
-    let file = File::open("inputp1p2.txt").unwrap();
+    let file = File::open("/inputfiles/inputp1p2.txt").unwrap();
     let reader = BufReader::new(file);
     let mut count:u32 = 0;
     let mut previous: u32 = 0;
